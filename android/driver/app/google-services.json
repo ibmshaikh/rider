@@ -1,0 +1,135 @@
+{
+  "project_info": {
+    "project_number": "474998841050",
+    "firebase_url": "https://locationsharing-a5da1.firebaseio.com",
+    "project_id": "locationsharing-a5da1",
+    "storage_bucket": "locationsharing-a5da1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:474998841050:android:ce10ce9774023b24",
+        "android_client_info": {
+          "package_name": "com.example.location_sharing"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "474998841050-li8ea6d5tvtbe3atgai60777h19s0e5g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.location_sharing",
+            "certificate_hash": "96825887a46f5459b1b45f956ecd48bc1a476aff"
+          }
+        },
+        {
+          "client_id": "474998841050-mgli79v02t9tcaoia15esl6lf8cnutds.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdXsRr71HkWnTnREBk9SlA12L92Xxhc8M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "474998841050-mgli79v02t9tcaoia15esl6lf8cnutds.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:474998841050:android:0b24a9651d5c4825cfcfe3",
+        "android_client_info": {
+          "package_name": "com.haris.kareem"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "474998841050-mgli79v02t9tcaoia15esl6lf8cnutds.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdXsRr71HkWnTnREBk9SlA12L92Xxhc8M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "474998841050-mgli79v02t9tcaoia15esl6lf8cnutds.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:474998841050:android:46070442c4c61d73cfcfe3",
+        "android_client_info": {
+          "package_name": "com.iramml.uberclone.driverapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "474998841050-mgli79v02t9tcaoia15esl6lf8cnutds.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdXsRr71HkWnTnREBk9SlA12L92Xxhc8M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "474998841050-mgli79v02t9tcaoia15esl6lf8cnutds.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:474998841050:android:d69e57fa6031b388cfcfe3",
+        "android_client_info": {
+          "package_name": "com.iramml.uberclone.riderapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "474998841050-mgli79v02t9tcaoia15esl6lf8cnutds.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdXsRr71HkWnTnREBk9SlA12L92Xxhc8M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "474998841050-mgli79v02t9tcaoia15esl6lf8cnutds.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
