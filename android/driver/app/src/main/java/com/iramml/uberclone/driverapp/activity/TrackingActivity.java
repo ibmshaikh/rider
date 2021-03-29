@@ -4,10 +4,14 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -64,6 +68,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -73,10 +79,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class TrackingActivity extends AppCompatActivity implements OnMapReadyCallback , GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+public class TrackingActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
-    LocationUtil location=null;
+    LocationUtil location = null;
 
     private GoogleApiClient mGoogleApiClient;
     double riderLat, riderLng;
@@ -100,24 +106,24 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
     FirebaseDatabase database;
 
     User riderData;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver_tracking);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        if(getIntent()!=null){
-            riderLat=getIntent().getDoubleExtra("lat",-1.0);
-            riderLng=getIntent().getDoubleExtra("lng",-1.0);
+        if (getIntent() != null) {
+            riderLat = getIntent().getDoubleExtra("lat", -1.0);
+            riderLng = getIntent().getDoubleExtra("lng", -1.0);
             riderID = getIntent().getStringExtra("riderID");
-            riderToken=getIntent().getStringExtra("token");
+            riderToken = getIntent().getStringExtra("token");
         }
         database = FirebaseDatabase.getInstance();
-        historyDriver = database.getReference(Common.history_driver).child(Common.userID);
-        historyRider = database.getReference(Common.history_rider).child(riderID);
-        riderInformation=database.getReference(Common.user_rider_tbl);
-        tokens=database.getReference(Common.token_tbl);
-        drivers= FirebaseDatabase.getInstance().getReference(Common.driver_tbl).child(Common.currentUser.getCarType());
-        geoFire=new GeoFire(drivers);
+
+        riderInformation = database.getReference(Common.user_rider_tbl);
+        tokens = database.getReference(Common.token_tbl);
+        drivers = FirebaseDatabase.getInstance().getReference(Common.driver_tbl).child(Common.currentUser.getCarType());
+        geoFire = new GeoFire(drivers);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -126,24 +132,24 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
 
         mService = RetrofitClient.getClient().create(googleAPIInterface.class);
         mFCMService = FCMClient.getClient().create(IFCMService.class);
-        location=new LocationUtil(this, new locationListener() {
+        location = new LocationUtil(this, new locationListener() {
             @Override
             public void locationResponse(LocationResult response) {
                 // refresh current location
-                Common.currentLat=response.getLastLocation().getLatitude();
-                Common.currentLng=response.getLastLocation().getLongitude();
+                Common.currentLat = response.getLastLocation().getLatitude();
+                Common.currentLng = response.getLastLocation().getLongitude();
                 displayLocation();
 
             }
         });
-        btnStartTrip=(Button)findViewById(R.id.btnStartTrip);
+        btnStartTrip = (Button) findViewById(R.id.btnStartTrip);
         btnStartTrip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(btnStartTrip.getText().equals("START TRIP")){
-                    pickupLocation=new LatLng(Common.currentLat, Common.currentLng);
+                if (btnStartTrip.getText().equals("START TRIP")) {
+                    //pickupLocation=new LatLng(Common.currentLat, Common.currentLng);
                     btnStartTrip.setText("DROP OFF HERE");
-                }else if(btnStartTrip.getText().equals("DROP OFF HERE")){
+                } else if (btnStartTrip.getText().equals("DROP OFF HERE")) {
                     calculateCashFree(pickupLocation, new LatLng(Common.currentLat, Common.currentLng));
                 }
             }
@@ -155,7 +161,7 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
         riderInformation.child(riderID).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                riderData=dataSnapshot.getValue(User.class);
+                riderData = dataSnapshot.getValue(User.class);
             }
 
             @Override
@@ -167,98 +173,67 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
 
     private void calculateCashFree(final LatLng pickupLocation, LatLng latLng) {
         String requestApi = null;
-        try {
-            requestApi = "https://maps.googleapis.com/maps/api/directions/json?" +
-                    "mode=driving&" +
-                    "transit_routing_preference=less_driving&" +
-                    "origin=" + pickupLocation.latitude + "," + pickupLocation.longitude + "&" +
-                    "destination=" + latLng.latitude + "," + latLng.longitude + "&" +
-                    "key=" + ConfigApp.GOOGLE_API_KEY;
-            mService.getPath(requestApi)
-                    .enqueue(new Callback<String>() {
-                        @Override
-                        public void onResponse(Call<String> call, Response<String> response) {
-                            try {
-                                JSONObject jsonObject=new JSONObject(response.body().toString());
-                                JSONArray routes=jsonObject.getJSONArray("routes");
 
-                                JSONObject object=routes.getJSONObject(0);
-                                JSONArray legs=object.getJSONArray("legs");
+        //Toast.makeText(TrackingActivity.this,response.body().toString(),Toast.LENGTH_LONG).show();
 
-                                JSONObject legsObject=legs.getJSONObject(0);
 
-                                JSONObject distance=legsObject.getJSONObject("distance");
-                                String distanceText=distance.getString("text");
 
-                                Double distanceValue=Double.parseDouble(distanceText.replaceAll("[^0-9\\\\.]+", ""));
+        String timeText = "0:10";
 
-                                JSONObject timeObject=legsObject.getJSONObject("duration");
-                                String timeText=timeObject.getString("text");
+        Double timeValue = Double.parseDouble(timeText.replaceAll("[^0-9\\\\.]+", ""));
 
-                                Double timeValue=Double.parseDouble(timeText.replaceAll("[^0-9\\\\.]+", ""));
+        sendDropOffNotification(riderToken);
+        Calendar calendar = Calendar.getInstance();
+        String date = String.format("%s, %d/%d", convertToDayOfWeek(calendar.get(Calendar.DAY_OF_WEEK)), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH));
 
-                                sendDropOffNotification(riderToken);
-                                Calendar calendar = Calendar.getInstance();
-                                String date = String.format("%s, %d/%d", convertToDayOfWeek(calendar.get(Calendar.DAY_OF_WEEK)), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH));
+        History driverHistory = new History();
+        driverHistory.setName(riderData.getName());
+        driverHistory.setStartAddress("sector 10");
+        driverHistory.setEndAddress("sector 10");
+        driverHistory.setTime(String.valueOf(timeValue));
+        driverHistory.setDistance(String.valueOf(0.01));
+        driverHistory.setTotal(Common.formulaPrice(0.01, timeValue));
+        driverHistory.setLocationStart(String.format("%f,%f", 19.063237, 72.8567176));
+        driverHistory.setLocationEnd(String.format("%f,%f", Common.currentLat, Common.currentLng));
+        driverHistory.setTripDate(date);
+        historyDriver = database.getReference(Common.history_driver).child(Common.userID);
+        historyRider = database.getReference(Common.history_rider).child(riderID);
+        historyDriver.push().setValue(driverHistory);
 
-                                History driverHistory = new History();
-                                driverHistory.setName(riderData.getName());
-                                driverHistory.setStartAddress(legsObject.getString("start_address"));
-                                driverHistory.setEndAddress(legsObject.getString("end_address"));
-                                driverHistory.setTime(String.valueOf(timeValue));
-                                driverHistory.setDistance(String.valueOf(distanceValue));
-                                driverHistory.setTotal(Common.formulaPrice(distanceValue, timeValue));
-                                driverHistory.setLocationStart(String.format("%f,%f", pickupLocation.latitude, pickupLocation.longitude));
-                                driverHistory.setLocationEnd(String.format("%f,%f", Common.currentLat, Common.currentLng));
-                                driverHistory.setTripDate(date);
-                                historyDriver.push().setValue(driverHistory);
+        History riderHistory = new History();
+        riderHistory.setName(Common.currentUser.getName());
+        riderHistory.setStartAddress("sector 10");
+        riderHistory.setEndAddress("sector 10");
+        riderHistory.setTime(String.valueOf(timeValue));
+        riderHistory.setDistance(String.valueOf(0.01));
+        riderHistory.setTotal(Common.formulaPrice(0.01, timeValue));
+        riderHistory.setLocationStart(String.format("%f,%f", 19.063237, 72.8567176));
+        riderHistory.setLocationEnd(String.format("%f,%f", Common.currentLat, Common.currentLng));
+        riderHistory.setTripDate(date);
+        historyRider.push().setValue(riderHistory);
 
-                                History riderHistory = new History();
-                                riderHistory.setName(Common.currentUser.getName());
-                                riderHistory.setStartAddress(legsObject.getString("start_address"));
-                                riderHistory.setEndAddress(legsObject.getString("end_address"));
-                                riderHistory.setTime(String.valueOf(timeValue));
-                                riderHistory.setDistance(String.valueOf(distanceValue));
-                                riderHistory.setTotal(Common.formulaPrice(distanceValue, timeValue));
-                                riderHistory.setLocationStart(String.format("%f,%f", pickupLocation.latitude, pickupLocation.longitude));
-                                riderHistory.setLocationEnd(String.format("%f,%f", Common.currentLat, Common.currentLng));
-                                riderHistory.setTripDate(date);
-                                historyRider.push().setValue(riderHistory);
+        Intent intent = new Intent(TrackingActivity.this, TripDetailActivity.class);
+        intent.putExtra("start_address", "sector 10");
+        intent.putExtra("end_address", "sector 10");
+        intent.putExtra("time", String.valueOf(timeValue));
+        intent.putExtra("distance", String.valueOf(0.01));
+        intent.putExtra("total", Common.formulaPrice(0.01, timeValue));
+        intent.putExtra("location_start", String.format("%f,%f", 19.063237, 72.8567176));
+        intent.putExtra("location_end", String.format("%f,%f", Common.currentLat, Common.currentLng));
 
-                                Intent intent = new Intent(TrackingActivity.this, TripDetailActivity.class);
-                                intent.putExtra("start_address", legsObject.getString("start_address"));
-                                intent.putExtra("end_address", legsObject.getString("end_address"));
-                                intent.putExtra("time", String.valueOf(timeValue));
-                                intent.putExtra("distance", String.valueOf(distanceValue));
-                                intent.putExtra("total", Common.formulaPrice(distanceValue, timeValue));
-                                intent.putExtra("location_start", String.format("%f,%f", pickupLocation.latitude, pickupLocation.longitude));
-                                intent.putExtra("location_end", String.format("%f,%f", Common.currentLat, Common.currentLng));
+        startActivity(intent);
+        finish();
 
-                                startActivity(intent);
-                                finish();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
 
-                        }
 
-                        @Override
-                        public void onFailure(Call<String> call, Throwable t) {
-                            Toast.makeText(TrackingActivity.this, "" + t.getMessage(), Toast.LENGTH_SHORT).show();
-
-                        }
-                    });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+}
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
         //add rider location
-        riderMarker=mMap.addCircle(new CircleOptions()
+        riderMarker = mMap.addCircle(new CircleOptions()
                 .center(new LatLng(riderLat, riderLng))
                 .radius(50)
                 .strokeColor(Color.BLUE)
@@ -299,7 +274,7 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
     }
 
     private void sendArrivedNotification(String customerToken) {
-        Notification notification = new Notification( "Arrived",String.format("The driver %s has arrived at your location", Common.currentUser.getName()));
+        Notification notification = new Notification("Arrived", String.format("The driver %s has arrived at your location", Common.currentUser.getName()));
         Sender sender = new Sender(customerToken, notification);
 
         mFCMService.sendMessage(sender).enqueue(new Callback<FCMResponse>() {
@@ -319,7 +294,7 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
     }
 
     private void sendDropOffNotification(String customertoken) {
-        Notification notification = new Notification( "DropOff", customertoken);
+        Notification notification = new Notification("DropOff", customertoken);
         Sender sender = new Sender(customertoken, notification);
 
         mFCMService.sendMessage(sender).enqueue(new Callback<FCMResponse>() {
@@ -337,8 +312,9 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
         });
 
     }
+
     private String convertToDayOfWeek(int day) {
-        switch(day){
+        switch (day) {
             case Calendar.SUNDAY:
                 return "SUNDAY";
             case Calendar.MONDAY:
@@ -357,11 +333,12 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
                 return "UNK";
         }
     }
-    private void displayLocation(){
+
+    private void displayLocation() {
         //add driver location
-        if(driverMarker!=null)driverMarker.remove();
-        driverMarker=mMap.addMarker(new MarkerOptions().position(new LatLng(Common.currentLat, Common.currentLng))
-        .title("You").icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_marker)));
+        if (driverMarker != null) driverMarker.remove();
+        driverMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(Common.currentLat, Common.currentLng))
+                .title("You").icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_marker)));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Common.currentLat, Common.currentLng), 14f));
         geoFire.setLocation(Common.userID,
                 new GeoLocation(Common.currentLat, Common.currentLng),
@@ -372,8 +349,8 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
                     }
                 });
         //remove route
-        if(direction!=null)direction.remove();
-          getDirection();
+        if (direction != null) direction.remove();
+        getDirection();
 
     }
 
@@ -416,16 +393,16 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
     }
 
     private void verifyGoogleAccount() {
-        GoogleSignInOptions gso=new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
-        mGoogleApiClient=new GoogleApiClient.Builder(this)
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
-        OptionalPendingResult<GoogleSignInResult> opr=Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
-        if (opr.isDone()){
-            GoogleSignInResult result= opr.get();
+        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+        if (opr.isDone()) {
+            GoogleSignInResult result = opr.get();
             handleSignInResult(result);
-        }else {
+        } else {
             opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
                 @Override
                 public void onResult(@NonNull GoogleSignInResult googleSignInResult) {
@@ -440,6 +417,7 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
             account = result.getSignInAccount();
         }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -473,64 +451,66 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
 
     }
 
-    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
 
-        ProgressDialog mDialog = new ProgressDialog(TrackingActivity.this);
+    ProgressDialog mDialog = new ProgressDialog(TrackingActivity.this);
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mDialog.setMessage("Please waiting...");
-            mDialog.show();
-        }
-
-        @Override
-        protected List<List<HashMap<String, String>>> doInBackground(String... strings) {
-            JSONObject jsonObject;
-            List<List<HashMap<String, String>>> routes = null;
-
-            try {
-                jsonObject = new JSONObject(strings[0]);
-                DirectionJSONParser parser = new DirectionJSONParser();
-                routes = parser.parse(jsonObject);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return routes;
-        }
-
-        @Override
-        protected void onPostExecute(List<List<HashMap<String, String>>> lists) {
-            mDialog.dismiss();
-
-            ArrayList points = null;
-            PolylineOptions polylineOptions = null;
-
-            for (int i = 0; i < lists.size(); i++) {
-                points = new ArrayList();
-                polylineOptions = new PolylineOptions();
-
-                List<HashMap<String, String>> path = lists.get(i);
-
-                for (int j = 0; j < path.size(); j++) {
-
-                    HashMap<String, String> point = path.get(j);
-
-                    double lat = Double.parseDouble(point.get("lat"));
-                    double lng = Double.parseDouble(point.get("lng"));
-                    LatLng position = new LatLng(lat, lng);
-
-                    points.add(position);
-                }
-
-                polylineOptions.addAll(points);
-                polylineOptions.width(10);
-                polylineOptions.color(Color.RED);
-                polylineOptions.geodesic(true);
-
-            }
-            direction = mMap.addPolyline(polylineOptions);
-        }
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        mDialog.setMessage("Please waiting...");
+        mDialog.show();
     }
+
+    @Override
+    protected List<List<HashMap<String, String>>> doInBackground(String... strings) {
+        JSONObject jsonObject;
+        List<List<HashMap<String, String>>> routes = null;
+
+        try {
+            jsonObject = new JSONObject(strings[0]);
+            DirectionJSONParser parser = new DirectionJSONParser();
+            routes = parser.parse(jsonObject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return routes;
+    }
+
+    @Override
+    protected void onPostExecute(List<List<HashMap<String, String>>> lists) {
+        mDialog.dismiss();
+
+        ArrayList points = null;
+        PolylineOptions polylineOptions = new PolylineOptions();
+        Log.d("Value of lat", "something");
+
+        for (int i = 0; i < lists.size(); i++) {
+
+            points = new ArrayList();
+            polylineOptions = new PolylineOptions();
+
+            List<HashMap<String, String>> path = lists.get(i);
+
+            for (int j = 0; j < path.size(); j++) {
+
+                HashMap<String, String> point = path.get(j);
+
+                double lat = Double.parseDouble(point.get("lat"));
+                double lng = Double.parseDouble(point.get("lng"));
+                LatLng position = new LatLng(lat, lng);
+                Toast.makeText(TrackingActivity.this, String.valueOf(lat), Toast.LENGTH_LONG).show();
+                points.add(position);
+            }
+
+            polylineOptions.addAll(points);
+            polylineOptions.width(10);
+            polylineOptions.color(Color.RED);
+            polylineOptions.geodesic(true);
+
+        }
+        direction = mMap.addPolyline(polylineOptions);
+    }
+}
 }

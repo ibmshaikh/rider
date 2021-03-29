@@ -132,9 +132,13 @@ public class CustomerCallActivity extends AppCompatActivity {
                     GoogleMapsAPIRequest requestObject = gson.fromJson(response.body().toString(), GoogleMapsAPIRequest.class);
                     Log.d("RESPONSE", response.body().toString());
 
-                    tvDistance.setText(requestObject.routes.get(0).legs.get(0).distance.text);
-                    tvTime.setText(requestObject.routes.get(0).legs.get(0).duration.text);
-                    tvAddress.setText(requestObject.routes.get(0).legs.get(0).end_address);
+                    //tvDistance.setText(requestObject.routes.get(0).legs.get(0).distance.text);
+                    //tvTime.setText(requestObject.routes.get(0).legs.get(0).duration.text);
+                    //tvAddress.setText(requestObject.routes.get(0).legs.get(0).end_address);
+
+                    tvDistance.setText("Distance");
+                    tvTime.setText("TIme");
+                    tvAddress.setText("Address");
                 }
 
                 @Override
