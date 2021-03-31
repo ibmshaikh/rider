@@ -7,7 +7,10 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
 import com.iramml.uberclone.riderapp.common.Common;
 import com.iramml.uberclone.riderapp.interfaces.IFCMService;
 import com.iramml.uberclone.riderapp.model.firebase.User;
@@ -58,6 +61,8 @@ public class CallDriverActivity extends AppCompatActivity {
             }
         });
     }
+
+
 
     private void loadDriverInfo(String driverID) {
         FirebaseDatabase.getInstance().getReference(Common.user_driver_tbl)

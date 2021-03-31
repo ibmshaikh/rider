@@ -25,6 +25,11 @@ import com.iramml.uberclone.driverapp.R;
 import com.iramml.uberclone.driverapp.retrofit.FCMClient;
 import com.iramml.uberclone.driverapp.retrofit.RetrofitClient;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -135,10 +140,10 @@ public class CustomerCallActivity extends AppCompatActivity {
                     //tvDistance.setText(requestObject.routes.get(0).legs.get(0).distance.text);
                     //tvTime.setText(requestObject.routes.get(0).legs.get(0).duration.text);
                     //tvAddress.setText(requestObject.routes.get(0).legs.get(0).end_address);
-
-                    tvDistance.setText("Distance");
-                    tvTime.setText("TIme");
-                    tvAddress.setText("Address");
+                    Date date = Calendar.getInstance().getTime();
+                    tvDistance.setText("0.1");
+                    tvTime.setText(date.toString());
+                    tvAddress.setText("Sector 10");
                 }
 
                 @Override
@@ -168,4 +173,6 @@ public class CustomerCallActivity extends AppCompatActivity {
         mediaPlayer.start();
         super.onResume();
     }
+
+
 }

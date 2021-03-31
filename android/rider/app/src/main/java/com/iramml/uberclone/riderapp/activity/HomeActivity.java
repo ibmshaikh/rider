@@ -32,6 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.iramml.uberclone.riderapp.OnRide;
 import com.iramml.uberclone.riderapp.adapter.ClickListener;
 import com.iramml.uberclone.riderapp.common.Common;
 import com.iramml.uberclone.riderapp.common.ConfigApp;
@@ -160,6 +161,9 @@ public class HomeActivity extends AppCompatActivity
         storageReference=storage.getReference();
         ifcmService=Common.getFCMService();
         networkUtil=new NetworkUtil(this);
+
+        loadOnRide();
+
         location=new Location(this, new locationListener() {
             @Override
             public void locationResponse(LocationResult response) {
@@ -287,6 +291,30 @@ public class HomeActivity extends AppCompatActivity
             }
         });
         updateFirebaseToken();
+    }
+
+    private void loadOnRide() {
+
+
+        DatabaseReference mref = FirebaseDatabase.getInstance().getReference();
+        mref.child("OnRide").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Intent i = new Intent(HomeActivity.this, OnRide.class);
+                    i.putExtra("Address",snapshot.child("Address").getValue().toString());
+                    i.putExtra("Rider Name",snapshot.child("Rider Name").getValue().toString());
+                    i.putExtra("startTime",snapshot.child("startTime").getValue().toString());
+                    startActivity(i);
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void initViews() {

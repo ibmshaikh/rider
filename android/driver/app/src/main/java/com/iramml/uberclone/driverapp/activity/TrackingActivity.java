@@ -74,6 +74,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -148,6 +149,16 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
             public void onClick(View v) {
                 if (btnStartTrip.getText().equals("START TRIP")) {
                     //pickupLocation=new LatLng(Common.currentLat, Common.currentLng);
+                    HashMap hashMap = new HashMap();
+                    Calendar calendar = Calendar.getInstance();
+                    String date = String.format("%s, %d/%d", convertToDayOfWeek(calendar.get(Calendar.DAY_OF_WEEK)), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH));
+
+                    hashMap.put("Rider Name",Common.currentUser.getName());
+                    hashMap.put("Address","sector10");
+                    hashMap.put("startTime",date);
+
+
+                    database.getReference().child("OnRide").child(riderID).setValue(hashMap);
                     btnStartTrip.setText("DROP OFF HERE");
                 } else if (btnStartTrip.getText().equals("DROP OFF HERE")) {
                     calculateCashFree(pickupLocation, new LatLng(Common.currentLat, Common.currentLng));
@@ -176,15 +187,15 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
 
         //Toast.makeText(TrackingActivity.this,response.body().toString(),Toast.LENGTH_LONG).show();
 
-
-
-        String timeText = "0:10";
+        String timeText = "0:01";
 
         Double timeValue = Double.parseDouble(timeText.replaceAll("[^0-9\\\\.]+", ""));
 
         sendDropOffNotification(riderToken);
         Calendar calendar = Calendar.getInstance();
-        String date = String.format("%s, %d/%d", convertToDayOfWeek(calendar.get(Calendar.DAY_OF_WEEK)), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH));
+        String date = String.format("%s, %d/%d", convertToDayOfWeek(calendar.get(Calendar.DAY_OF_WEEK)), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH));Random rand = new Random();
+
+        double amount = (rand.nextInt(30));
 
         History driverHistory = new History();
         driverHistory.setName(riderData.getName());
@@ -192,7 +203,7 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
         driverHistory.setEndAddress("sector 10");
         driverHistory.setTime(String.valueOf(timeValue));
         driverHistory.setDistance(String.valueOf(0.01));
-        driverHistory.setTotal(Common.formulaPrice(0.01, timeValue));
+        driverHistory.setTotal(amount);
         driverHistory.setLocationStart(String.format("%f,%f", 19.063237, 72.8567176));
         driverHistory.setLocationEnd(String.format("%f,%f", Common.currentLat, Common.currentLng));
         driverHistory.setTripDate(date);
@@ -206,18 +217,20 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
         riderHistory.setEndAddress("sector 10");
         riderHistory.setTime(String.valueOf(timeValue));
         riderHistory.setDistance(String.valueOf(0.01));
-        riderHistory.setTotal(Common.formulaPrice(0.01, timeValue));
+        riderHistory.setTotal(amount);
         riderHistory.setLocationStart(String.format("%f,%f", 19.063237, 72.8567176));
         riderHistory.setLocationEnd(String.format("%f,%f", Common.currentLat, Common.currentLng));
         riderHistory.setTripDate(date);
         historyRider.push().setValue(riderHistory);
+
+        database.getReference().child("OnRide").child(riderID).setValue(null);
 
         Intent intent = new Intent(TrackingActivity.this, TripDetailActivity.class);
         intent.putExtra("start_address", "sector 10");
         intent.putExtra("end_address", "sector 10");
         intent.putExtra("time", String.valueOf(timeValue));
         intent.putExtra("distance", String.valueOf(0.01));
-        intent.putExtra("total", Common.formulaPrice(0.01, timeValue));
+        intent.putExtra("total", amount);
         intent.putExtra("location_start", String.format("%f,%f", 19.063237, 72.8567176));
         intent.putExtra("location_end", String.format("%f,%f", Common.currentLat, Common.currentLng));
 
